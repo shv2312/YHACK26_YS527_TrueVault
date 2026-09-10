@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { assetService } from '../services/api';
 import { Link } from 'react-router-dom';
 import { FileText, Share2, Activity, ShieldCheck, Search, Filter, Fingerprint, LockKeyhole, Cpu } from 'lucide-react';
-import { GlassCard } from '../components/ui/GlassCard';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { useAuth } from '../context/AuthContext';
 
@@ -16,12 +15,8 @@ export default function Dashboard() {
 
   useEffect(() => {
     assetService.getAssets().then(data => {
-      setAssets(data);
-      setLoading(false);
-    }).catch(() => {
-      setError('Failed to fetch assets');
-      setLoading(false);
-    });
+      setAssets(data); setLoading(false);
+    }).catch(() => { setError('Failed to fetch assets'); setLoading(false); });
   }, []);
 
   const ownedCount = assets.filter(a => a.accessStatus === 'OWNER').length;
@@ -35,85 +30,73 @@ export default function Dashboard() {
   });
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
-      
+    <div className="space-y-8 max-w-6xl">
+
       {/* Identity Summary Card */}
-      <GlassCard className="p-6 border-primary/20">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="flex items-center space-x-4">
-            <div className="w-16 h-16 rounded-full bg-black/40 border border-primary/30 flex items-center justify-center shrink-0">
-              <Fingerprint className="w-8 h-8 text-primary drop-shadow-[0_0_8px_rgba(0,229,255,0.5)]" />
-            </div>
-            <div>
-              <div className="flex items-center space-x-2 mb-1">
-                <h2 className="text-xl font-bold text-white tracking-wide">{institutionName}</h2>
-                <StatusBadge status="success" text="Verified Identity" />
-              </div>
-              <div className="flex flex-wrap items-center gap-3 text-sm text-gray-400">
-                <span className="flex items-center"><LockKeyhole className="w-4 h-4 mr-1 text-accent" /> Role: <strong className="text-white ml-1">{role}</strong></span>
-                <span className="hidden md:inline">•</span>
-                <span className="font-mono bg-black/30 px-2 py-0.5 rounded border border-white/10">{walletAddress}</span>
-              </div>
-            </div>
+      <div className="bg-white rounded-[18px] border border-border-light p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="flex items-center space-x-4">
+          <div className="w-14 h-14 rounded-2xl bg-primary/8 flex items-center justify-center shrink-0">
+            <Fingerprint className="w-7 h-7 text-primary" />
           </div>
-          <div className="grid grid-cols-2 gap-4 text-xs">
-            <div className="bg-black/30 p-3 rounded-lg border border-white/5">
-              <span className="text-gray-500 uppercase tracking-wider block mb-1">Biometric Mode</span>
-              <span className="text-yellow-400 font-medium">Simulated</span>
+          <div>
+            <div className="flex items-center space-x-2 mb-1">
+              <h2 className="text-lg font-bold text-text-primary">{institutionName}</h2>
+              <StatusBadge status="success" text="Verified Identity" />
             </div>
-            <div className="bg-black/30 p-3 rounded-lg border border-white/5">
-              <span className="text-gray-500 uppercase tracking-wider block mb-1">Blockchain Mode</span>
-              <span className="text-primary font-medium">Demo / Local</span>
+            <div className="flex flex-wrap items-center gap-3 text-sm text-text-secondary">
+              <span className="flex items-center"><LockKeyhole className="w-3.5 h-3.5 mr-1 text-primary" /> Role: <strong className="text-text-primary ml-1">{role}</strong></span>
+              <span className="font-mono bg-[#F4F6F8] px-2 py-0.5 rounded text-xs border border-border-light">{walletAddress}</span>
             </div>
           </div>
         </div>
-      </GlassCard>
+        <div className="grid grid-cols-2 gap-3 text-xs">
+          <div className="bg-[#F7F8FA] p-3 rounded-xl border border-border-light">
+            <span className="text-text-muted uppercase tracking-wider block mb-0.5 text-[10px] font-bold">Biometric</span>
+            <span className="text-amber-600 font-semibold">Simulated</span>
+          </div>
+          <div className="bg-[#F7F8FA] p-3 rounded-xl border border-border-light">
+            <span className="text-text-muted uppercase tracking-wider block mb-0.5 text-[10px] font-bold">Blockchain</span>
+            <span className="text-primary font-semibold">Demo</span>
+          </div>
+        </div>
+      </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {[
-          { label: 'Total Assets', value: assets.length, icon: FileText, color: 'text-primary', bg: 'bg-primary/10 border-primary/20' },
-          { label: 'Owned Assets', value: ownedCount, icon: ShieldCheck, color: 'text-green-400', bg: 'bg-green-500/10 border-green-500/20' },
-          { label: 'Shared Assets', value: sharedCount, icon: Share2, color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' },
-          { label: 'Pending Tx', value: pendingCount, icon: Cpu, color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/20' }
+          { label: 'Total Assets', value: assets.length, icon: FileText, color: 'text-primary', bg: 'bg-primary/8' },
+          { label: 'Owned Assets', value: ownedCount, icon: ShieldCheck, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+          { label: 'Shared Assets', value: sharedCount, icon: Share2, color: 'text-blue-600', bg: 'bg-blue-50' },
+          { label: 'Pending Tx', value: pendingCount, icon: Cpu, color: 'text-amber-600', bg: 'bg-amber-50' }
         ].map(stat => (
-          <GlassCard key={stat.label} className="p-6">
+          <div key={stat.label} className="bg-white rounded-[16px] border border-border-light p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-400 uppercase tracking-wider">{stat.label}</p>
-                <p className="text-3xl font-bold text-white mt-1">{loading ? '-' : stat.value}</p>
+                <p className="text-xs font-bold text-text-muted uppercase tracking-wider mb-1">{stat.label}</p>
+                <p className="text-3xl font-bold text-text-primary">{loading ? '-' : stat.value}</p>
               </div>
-              <div className={`p-3 rounded-lg border shadow-lg ${stat.bg}`}>
-                <stat.icon className={`w-6 h-6 ${stat.color}`} />
+              <div className={`p-3 rounded-2xl ${stat.bg}`}>
+                <stat.icon className={`w-5 h-5 ${stat.color}`} />
               </div>
             </div>
-          </GlassCard>
+          </div>
         ))}
       </div>
 
-      {/* Assets Table */}
-      <GlassCard className="overflow-hidden">
-        <div className="px-6 py-5 border-b border-white/10 bg-black/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <h3 className="text-lg font-bold text-white tracking-wide">Secure Asset Vault</h3>
-          
+      {/* Asset Table */}
+      <div className="bg-white rounded-[18px] border border-border-light overflow-hidden">
+        <div className="px-6 py-5 border-b border-border-light flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <h3 className="text-lg font-bold text-text-primary">Secure Asset Vault</h3>
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-              <input 
-                type="text" 
-                placeholder="Search assets..." 
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                className="glass-input pl-9 pr-4 py-2 text-sm rounded-md w-full sm:w-64"
-              />
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
+              <input type="text" placeholder="Search assets..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+                className="input-light pl-9 pr-4 py-2 text-sm w-full sm:w-56" />
             </div>
             <div className="relative">
-              <Filter className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-              <select 
-                value={statusFilter}
-                onChange={e => setStatusFilter(e.target.value)}
-                className="glass-input pl-9 pr-8 py-2 text-sm rounded-md appearance-none [&>option]:text-black w-full sm:w-auto"
-              >
+              <Filter className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
+              <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
+                className="input-light pl-9 pr-8 py-2 text-sm appearance-none w-full sm:w-auto">
                 <option value="ALL">All Status</option>
                 <option value="CONFIRMED">Confirmed</option>
                 <option value="PENDING">Pending</option>
@@ -122,57 +105,48 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="overflow-x-auto min-h-[300px]">
+        <div className="overflow-x-auto min-h-[280px]">
           {loading ? (
-            <div className="flex flex-col items-center justify-center h-64 text-gray-400">
-              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
-              Loading secure vault...
+            <div className="flex flex-col items-center justify-center h-64 text-text-muted">
+              <div className="w-7 h-7 border-2 border-primary border-t-transparent rounded-full animate-spin mb-3"></div>
+              Loading assets...
             </div>
           ) : error ? (
-            <div className="flex flex-col items-center justify-center h-64 text-red-400">
-              <Activity className="w-12 h-12 mb-4 opacity-50" />
-              {error}
+            <div className="flex flex-col items-center justify-center h-64 text-red-500">
+              <Activity className="w-10 h-10 mb-3 opacity-40" /> {error}
             </div>
           ) : filteredAssets.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-64 text-gray-500">
-              <FileText className="w-12 h-12 mb-4 opacity-30" />
-              <p>No assets found matching your criteria.</p>
+            <div className="flex flex-col items-center justify-center h-64 text-text-muted">
+              <FileText className="w-10 h-10 mb-3 opacity-30" />
+              <p>No assets found.</p>
             </div>
           ) : (
-            <table className="min-w-full divide-y divide-white/5">
-              <thead className="bg-black/40">
+            <table className="min-w-full">
+              <thead className="bg-[#F7F8FA] border-b border-border-light">
                 <tr>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Asset Name</th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Type</th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Access Level</th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Blockchain Status</th>
-                  <th className="px-6 py-4 text-right text-xs font-bold text-gray-400 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-3.5 text-left text-xs font-bold text-text-muted uppercase tracking-wider">Asset Name</th>
+                  <th className="px-6 py-3.5 text-left text-xs font-bold text-text-muted uppercase tracking-wider">Type</th>
+                  <th className="px-6 py-3.5 text-left text-xs font-bold text-text-muted uppercase tracking-wider">Access Level</th>
+                  <th className="px-6 py-3.5 text-left text-xs font-bold text-text-muted uppercase tracking-wider">Blockchain Status</th>
+                  <th className="px-6 py-3.5 text-right text-xs font-bold text-text-muted uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-border-light">
                 {filteredAssets.map((asset) => (
-                  <tr key={asset.id} className="hover:bg-white/5 transition-colors">
+                  <tr key={asset.id} className="hover:bg-[#F7F8FA] transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-bold text-white">{asset.name}</div>
-                      <div className="text-xs text-gray-500 font-mono mt-0.5" title={asset.fileHash}>
-                        {asset.fileHash.substring(0, 16)}...
-                      </div>
+                      <div className="text-sm font-semibold text-text-primary">{asset.name}</div>
+                      <div className="text-xs text-text-muted font-mono mt-0.5">{asset.fileHash.substring(0, 16)}...</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 capitalize">{asset.type}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary capitalize">{asset.type}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <StatusBadge 
-                        status={asset.accessStatus === 'OWNER' ? 'success' : 'info'} 
-                        text={asset.accessStatus} 
-                      />
+                      <StatusBadge status={asset.accessStatus === 'OWNER' ? 'success' : 'info'} text={asset.accessStatus} />
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <StatusBadge 
-                        status={asset.blockchainStatus === 'CONFIRMED' ? 'success' : 'warning'} 
-                        text={asset.blockchainStatus} 
-                      />
+                      <StatusBadge status={asset.blockchainStatus === 'CONFIRMED' ? 'success' : 'warning'} text={asset.blockchainStatus} />
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <Link to={`/asset/${asset.id}`} className="text-primary hover:text-primary-light transition-colors px-3 py-1.5 rounded bg-primary/10 hover:bg-primary/20 border border-primary/20">
+                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <Link to={`/asset/${asset.id}`} className="text-sm font-semibold text-primary hover:text-primary-dark transition-colors px-3 py-1.5 rounded-lg bg-primary/8 hover:bg-primary/15">
                         View Details
                       </Link>
                     </td>
@@ -182,7 +156,7 @@ export default function Dashboard() {
             </table>
           )}
         </div>
-      </GlassCard>
+      </div>
     </div>
   );
 }

@@ -1,28 +1,37 @@
 import React from 'react';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'danger';
+  variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
+  size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
+  pill?: boolean;
 }
 
-export const Button = ({ children, variant = 'primary', className = '', isLoading, disabled, ...props }: ButtonProps) => {
-  const baseClasses = "flex items-center justify-center px-5 py-2.5 rounded-md font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed";
-  
-  const variants = {
-    primary: "bg-primary text-black hover:bg-primary-light shadow-[0_0_15px_rgba(0,229,255,0.3)] hover:shadow-[0_0_20px_rgba(0,229,255,0.5)] border border-transparent",
-    secondary: "bg-transparent text-white border border-white/20 hover:border-white/40 hover:bg-white/5",
-    danger: "bg-danger text-white hover:bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.3)] border border-transparent",
+export const Button = ({ children, variant = 'primary', size = 'md', className = '', isLoading, disabled, pill, ...props }: ButtonProps) => {
+  const base = "inline-flex items-center justify-center font-semibold transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed";
+
+  const sizes: Record<string, string> = {
+    sm: "px-4 py-2 text-sm",
+    md: "px-5 py-2.5 text-[15px]",
+    lg: "px-8 py-3.5 text-base",
+  };
+
+  const radius = pill ? 'rounded-full' : 'rounded-[12px]';
+
+  const variants: Record<string, string> = {
+    primary: "bg-primary text-white hover:bg-primary-dark shadow-sm",
+    secondary: "bg-transparent text-text-secondary border border-border-light hover:bg-bg-light hover:text-text-primary",
+    danger: "bg-danger text-white hover:bg-red-600",
+    ghost: "bg-transparent text-text-secondary hover:text-text-primary hover:bg-bg-light",
   };
 
   return (
-    <button 
-      className={`${baseClasses} ${variants[variant]} ${className}`}
+    <button
+      className={`${base} ${sizes[size]} ${radius} ${variants[variant]} ${className}`}
       disabled={disabled || isLoading}
       {...props}
     >
-      {isLoading ? (
-        <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-2"></div>
-      ) : null}
+      {isLoading && <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2"></div>}
       {children}
     </button>
   );
