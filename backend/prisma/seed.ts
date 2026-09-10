@@ -4,6 +4,9 @@ import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
+  // WARNING: These are LOCAL DEMO-ONLY CREDENTIALS meant exclusively for the hackathon environment.
+  // DO NOT use these credentials in a production environment. 
+  // Passwords are still securely hashed before storage.
   const passwordHash = await bcrypt.hash('demo_password_123', 10);
 
   const roles = ['ADMIN', 'OWNER', 'OFFICIAL', 'VERIFIER'];

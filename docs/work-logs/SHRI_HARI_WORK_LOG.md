@@ -45,3 +45,19 @@
 * Security limitations: Encryption is mock XOR; service signer is not yet securely injected; demo credentials are in cleartext in `seed.ts` but meant only for local hackathon demo.
 * Integration pending: Parthiban's `blockchain-integration` branch merge and smart contract ABI. Sanjay's frontend changes.
 * Blockers: None currently. All backend foundational and integration readiness tasks are completed.
+
+## 10 September 2026 - Security Corrections Before Integration
+
+* Files changed: `backend/src/routes.ts`, `backend/src/crypto.ts` (new), `backend/src/crypto.test.ts` (new), `backend/test_multipart.js`, `backend/prisma/schema.prisma`, `backend/prisma/seed.ts`, `backend/.env.example`.
+* AES-256-GCM: Successfully replaced mock XOR loop with Node.js built-in `crypto` AES-256-GCM.
+* Key handling: A 32-byte encryption key is injected securely via the `FILE_ENCRYPTION_KEY` environment variable; unique 12-byte IVs are generated per file.
+* Encryption tests: `crypto.test.ts` natively verifies hashing, AES-256-GCM encryption/decryption, unique IV generation, incorrect keys, and tamper detection.
+* Multipart upload tests: Verified via `test_multipart.js` utilizing native `fetch` and `FormData` (Valid upload, missing file, authorized download/decryption).
+* Tamper detection: GCM Authentication tag is verified during decryption; throws and gracefully rejects if modified.
+* Blockchain mode reporting: Adjusted `MockBlockchainAdapter` to report its health as `MOCK` and transactions as `DEMO`, reflecting honest state.
+* Demo account safety: Inserted explicit warnings in `seed.ts` labeling them as LOCAL DEMO-ONLY. Passwords remain hashed.
+* Tests passed: AES encryption unit tests, Tamper detection, Multipart uploads, Login, MOCK Health reporting.
+* Tests failed: None.
+* Tests blocked: Actual E2E Blockchain transactions (Requires live contract).
+* Remaining integration: Front-end integration, actual Blockchain RPC configuration.
+* Blockers: None. Security corrections completed.

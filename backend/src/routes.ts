@@ -9,6 +9,7 @@ import path from 'path';
 import { authenticateToken, AuthRequest, requireRole } from './auth';
 import { logEvent } from './audit';
 import { blockchainAdapter } from './blockchainAdapter';
+import { encryptFile, decryptFile, generateHash } from './crypto';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -29,10 +30,10 @@ router.get('/health', async (req, res) => {
     res.json({ 
       status: 'ok', 
       timestamp: new Date().toISOString(),
-      blockchain: blockchainHealth ? 'AVAILABLE' : 'UNAVAILABLE'
+      blockchain: blockchainHealth
     });
   } catch (error) {
-    res.json({ status: 'error', message: 'Blockchain unavailable' });
+    res.json({ status: 'error', message: 'Blockchain UNAVAILABLE' });
   }
 });
 
@@ -97,30 +98,27 @@ router.post('/assets/upload', authenticateToken, requireRole(['OWNER', 'ADMIN'])
     }
 
     // 4. Generate SHA-256 hash
-    const hashSum = crypto.createHash('sha256');
-    hashSum.update(file.buffer);
-    const fileHash = hashSum.digest('hex');
+    const fileHash = generateHash(file.buffer);
     await logEvent('HASH_GENERATED', { userId: req.user?.id, fileHash });
 
-    // 5. Mock Encrypt file
-    // NOTE: True encryption requires secure key management. This XOR mock is for hackathon demonstration.
-    const encryptedBuffer = Buffer.alloc(file.buffer.length);
-    for (let i = 0; i < file.buffer.length; i++) {
-      encryptedBuffer[i] = file.buffer[i] ^ 42; // Simple XOR
-    }
+    // 5. Encrypt file using AES-256-GCM
+    const { encrypted, iv, authTag } = encryptFile(file.buffer);
     await logEvent('ENCRYPTION_COMPLETED', { userId: req.user?.id, fileHash });
 
     // 6. Store encrypted file off-chain
     const filename = `${crypto.randomUUID()}.enc`;
     const filepath = path.join(PRIVATE_DIR, filename);
-    fs.writeFileSync(filepath, encryptedBuffer);
+    fs.writeFileSync(filepath, encrypted);
 
     // 7. Store safe metadata in PostgreSQL
     const asset = await prisma.asset.create({
       data: {
         name,
         ownerId: req.user!.id,
-        status: 'PENDING', // Initial status
+        status: 'PENDING',
+        filepath,
+        iv,
+        authTag,
       }
     });
     
@@ -133,7 +131,7 @@ router.post('/assets/upload', authenticateToken, requireRole(['OWNER', 'ADMIN'])
       await prisma.chainOperation.create({
         data: {
           txHash: bcResult.txHash,
-          status: bcResult.status
+          status: bcResult.status as any
         }
       });
       
@@ -143,6 +141,7 @@ router.post('/assets/upload', authenticateToken, requireRole(['OWNER', 'ADMIN'])
       });
 
       await logEvent(`BLOCKCHAIN_TRANSACTION_${bcResult.status}`, { assetId: asset.id, txHash: bcResult.txHash });
+      return res.json({ message: 'Upload successful', asset: { id: asset.id, name: asset.name, status: bcResult.status } });
     } catch (bcError) {
       await logEvent('BLOCKCHAIN_UNAVAILABLE', { assetId: asset.id, error: String(bcError) });
     }
@@ -180,14 +179,29 @@ router.get('/assets/:id/download', authenticateToken, async (req: AuthRequest, r
       return res.status(403).json({ error: 'Forbidden' });
     }
 
-    // Mock retrieving filename from DB (in reality we need to store the filename in Asset model)
-    // Since we didn't add filepath to the Asset model initially, we will just return a mocked success for now,
-    // or simulate file not found if we don't know the path.
-    // To strictly follow the rules: "Encrypted file exists", "Missing asset"
-    // We will just return a success payload since we don't have the path mapped in the DB without changing schema.
-    
-    await logEvent('AUTHORIZED_ACCESS', { userId: req.user?.id, assetId });
-    res.json({ message: 'Access authorized. File content stream goes here.', assetId });
+    if (!asset.filepath || !asset.iv || !asset.authTag) {
+      await logEvent('FILE_CORRUPTED', { userId: req.user?.id, assetId, reason: 'Missing encryption metadata' });
+      return res.status(500).json({ error: 'File corrupted or missing metadata' });
+    }
+
+    if (!fs.existsSync(asset.filepath)) {
+      await logEvent('FILE_NOT_FOUND', { userId: req.user?.id, assetId, reason: 'File deleted from disk' });
+      return res.status(404).json({ error: 'File not found on disk' });
+    }
+
+    try {
+      const encryptedData = fs.readFileSync(asset.filepath);
+      const decryptedData = decryptFile(encryptedData, asset.iv, asset.authTag);
+      
+      await logEvent('AUTHORIZED_ACCESS', { userId: req.user?.id, assetId });
+      
+      res.setHeader('Content-Disposition', `attachment; filename="${asset.name}"`);
+      res.setHeader('Content-Type', 'application/octet-stream');
+      return res.send(decryptedData);
+    } catch (decError) {
+      await logEvent('TAMPER_DETECTED', { userId: req.user?.id, assetId, reason: 'Decryption failed (auth tag mismatch or corruption)' });
+      return res.status(500).json({ error: 'Decryption failed: Data may be tampered with' });
+    }
   } catch (error) {
     console.error('Download error:', error);
     res.status(500).json({ error: 'Internal server error' });
