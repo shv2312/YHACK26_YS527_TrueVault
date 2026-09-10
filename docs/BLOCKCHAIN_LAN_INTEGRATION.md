@@ -9,7 +9,7 @@ This guide contains the non-secret connection information for the TrueVault back
 - **Deployment Command:** `npx hardhat run scripts/deploy.js --network localhost` (After a restart, you MUST redeploy the contract to generate a new address).
 
 ## Connection Information
-- **RPC URL:** `http://172.168.77.10:8545` (Replace with current IPv4 if network reconnects).
+- **RPC URL:** `http://<PARTHIBAN_PRIVATE_IPV4>:8545` (Replace with current private IPv4 if network reconnects).
 - **Chain ID:** `31337`
 - **Current Contract Address:** `0x5FbDB2315678afecb367f032d93F642f64180aa3` (Temporary! Will reset if Hardhat restarts).
 - **ABI Location:** `blockchain/artifacts/contracts/TrueVaultAsset.sol/TrueVaultAsset.json`
