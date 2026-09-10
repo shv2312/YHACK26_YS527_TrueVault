@@ -1,13 +1,24 @@
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { Shield, LayoutDashboard, FileUp, Users, History, LogOut } from 'lucide-react';
 import { authService } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import { useEffect } from 'react';
 
 export default function DashboardLayout() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { institutionName, role, walletAddress, isAuthenticated, logout } = useAuth();
+
+  useEffect(() => {
+    // If somehow landed here without auth, redirect to login
+    if (!isAuthenticated) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleLogout = async () => {
     await authService.logout();
+    logout();
     navigate('/login');
   };
 
@@ -18,16 +29,19 @@ export default function DashboardLayout() {
     { name: 'Audit Trail', path: '/audit', icon: History },
   ];
 
+  if (!isAuthenticated) return null; // Avoid flicker
+
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-[var(--color-bg-navy)] overflow-hidden">
+      
       {/* Sidebar */}
-      <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
-        <div className="p-6 flex items-center space-x-3">
-          <Shield className="w-8 h-8 text-primary" />
-          <span className="text-xl font-bold tracking-tight text-gray-900">TrueVault</span>
+      <div className="w-64 glass-panel border-r-0 flex flex-col z-20">
+        <div className="p-6 flex items-center space-x-3 mb-4">
+          <Shield className="w-8 h-8 text-primary drop-shadow-[0_0_8px_rgba(0,229,255,0.8)]" />
+          <span className="text-xl font-bold tracking-tight text-white">TrueVault</span>
         </div>
         
-        <nav className="flex-1 px-4 space-y-1 mt-4">
+        <nav className="flex-1 px-4 space-y-2">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
@@ -35,44 +49,54 @@ export default function DashboardLayout() {
               <Link
                 key={item.name}
                 to={item.path}
-                className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-colors ${
+                className={`flex items-center space-x-3 px-3 py-3 rounded-lg transition-all duration-300 ${
                   isActive 
-                    ? 'bg-primary-light/10 text-primary font-medium' 
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    ? 'glass-card border-primary/50 text-white font-medium' 
+                    : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent'
                 }`}
               >
-                <Icon className={`w-5 h-5 ${isActive ? 'text-primary' : 'text-gray-400'}`} />
+                <Icon className={`w-5 h-5 ${isActive ? 'text-primary drop-shadow-[0_0_5px_rgba(0,229,255,0.5)]' : 'text-gray-500'}`} />
                 <span>{item.name}</span>
               </Link>
             );
           })}
         </nav>
 
-        <div className="p-4 border-t border-gray-200">
+        <div className="p-4 border-t border-white/10 mt-auto">
           <button
             onClick={handleLogout}
-            className="flex items-center space-x-3 px-3 py-2.5 w-full rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+            className="flex items-center space-x-3 px-3 py-3 w-full rounded-lg text-gray-400 hover:text-white hover:bg-red-500/10 transition-colors"
           >
-            <LogOut className="w-5 h-5 text-gray-400" />
-            <span>Logout</span>
+            <LogOut className="w-5 h-5 text-red-400" />
+            <span>Logout Session</span>
           </button>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-auto">
-        <header className="bg-white border-b border-gray-200 px-8 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-semibold text-gray-800">
+      <div className="flex-1 flex flex-col h-screen overflow-hidden relative z-10">
+        
+        {/* Top Header */}
+        <header className="glass-panel border-b-0 px-8 py-4 flex justify-between items-center z-20 sticky top-0">
+          <h1 className="text-xl font-semibold text-white tracking-wide">
             {navItems.find(i => i.path === location.pathname)?.name || 'TrueVault'}
           </h1>
-          <div className="flex items-center space-x-4">
-            <div className="text-sm font-medium text-gray-500">Role: <span className="text-primary font-bold">OWNER</span></div>
-            <div className="h-8 w-8 rounded-full bg-primary-light/20 flex items-center justify-center text-primary font-bold">
-              U
+          
+          <div className="flex items-center space-x-6">
+            <div className="flex flex-col items-end">
+              <span className="text-[10px] text-primary uppercase tracking-wider font-bold mb-0.5">{institutionName}</span>
+              <div className="flex items-center space-x-3">
+                <span className="text-xs text-gray-400 font-mono">{walletAddress}</span>
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-accent/20 text-accent border border-accent/30">
+                  {role}
+                </span>
+              </div>
             </div>
           </div>
         </header>
-        <main className="p-8">
+
+        {/* Scrollable Main Area */}
+        <main className="flex-1 overflow-y-auto p-8 relative z-0">
           <Outlet />
         </main>
       </div>
