@@ -23,7 +23,7 @@ export default function DashboardLayout() {
   };
 
   const navItems = [
-    { name: 'Dashboard', path: '/', icon: LayoutDashboard },
+    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Upload Asset', path: '/upload', icon: FileUp },
     { name: 'Role Access', path: '/roles', icon: Users },
     { name: 'Audit Trail', path: '/audit', icon: History },

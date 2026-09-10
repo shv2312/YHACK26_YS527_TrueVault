@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import DashboardLayout from './layouts/DashboardLayout';
+import Landing from './pages/Landing';
+import PublicVerify from './pages/PublicVerify';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import UploadAsset from './pages/UploadAsset';
@@ -13,11 +15,13 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/verify" element={<PublicVerify />} />
           <Route path="/login" element={<Login />} />
           
           {/* Protected Dashboard Routes */}
           <Route element={<DashboardLayout />}>
-            <Route path="/" element={<Dashboard />} />
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/upload" element={<UploadAsset />} />
             <Route path="/asset/:id" element={<AssetDetails />} />
             <Route path="/roles" element={<RoleAccess />} />
