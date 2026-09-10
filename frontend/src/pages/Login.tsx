@@ -54,9 +54,9 @@ export default function Login() {
         await authService.login(credId, password);
         login(selectedInst?.name || 'Unknown', selectedRole || 'VERIFIER', wallet || '0xDemo');
         navigate('/dashboard');
-      } catch {
-        login(selectedInst?.name || 'Unknown', selectedRole || 'VERIFIER', wallet || '0xDemo');
-        navigate('/dashboard');
+      } catch (err: any) {
+        setError(err.message || 'Authentication failed. Check credentials.');
+        setLoading(false);
       }
     }, 2000);
   };

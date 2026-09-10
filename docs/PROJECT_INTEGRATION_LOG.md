@@ -5,3 +5,10 @@
 - Pending: End-to-end integration tests
 - Checks: None yet
 - Blockers: None currently
+
+## 11 September 2026 - Frontend Final Integration
+
+- Completed: Frontend-backend authentication integration. Replaced canonical `frontend/` with `frontend-redesign/`.
+- Connected Endpoints: `/api/auth/login`, `/api/auth/logout`, `/api/auth/me`.
+- Pending: Asset, Audit, and Role endpoints are missing from the backend and are currently retained in frontend Demo Mode.
+- Blockers: Real backend controllers needed for Asset upload, Asset Verification, Audit Logs, and Role Management.
