@@ -15,11 +15,12 @@ async function main() {
     const username = `demo_${role.toLowerCase()}`;
     await prisma.user.upsert({
       where: { username },
-      update: {},
+      update: { walletAddress: `0x${Math.random().toString(16).substr(2, 40)}` },
       create: {
         username,
         passwordHash,
         role: role as any,
+        walletAddress: `0x${Math.random().toString(16).substr(2, 40)}`
       },
     });
     console.log(`Created demo user: ${username}`);

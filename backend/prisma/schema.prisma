@@ -25,6 +25,7 @@ model User {
   id           String            @id @default(uuid())
   username     String            @unique
   passwordHash String
+  walletAddress String?           @unique @default(uuid())
   role         Role              @default(OWNER)
   challenges   WalletChallenge[]
   assets       Asset[]
@@ -46,6 +47,9 @@ model Asset {
   ownerId   String
   owner     User     @relation(fields: [ownerId], references: [id])
   status    String
+  type      String   @default("document")
+  nftTokenId String? @unique @default(uuid())
+  fileHash  String?  @unique @default(uuid())
   filepath  String?
   iv        String?
   authTag   String?
@@ -65,5 +69,6 @@ model AuditEvent {
   id        String   @id @default(uuid())
   action    String
   timestamp DateTime @default(now())
+  assetId   String?
   details   String?  // Storing JSON as string for simplicity, or Json type if needed.
 }

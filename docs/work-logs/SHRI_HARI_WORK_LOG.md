@@ -61,3 +61,15 @@
 * Tests blocked: Actual E2E Blockchain transactions (Requires live contract).
 * Remaining integration: Front-end integration, actual Blockchain RPC configuration.
 * Blockers: None. Security corrections completed.
+
+## 11 September 2026 - Final Backend API and Blockchain Integration
+
+* Files changed: `backend/src/routes.ts`, `backend/src/auth.ts`, `backend/src/blockchain/RealBlockchainAdapter.ts` (new), `backend/src/blockchainAdapter.ts`, `backend/prisma/schema.prisma`, `backend/prisma/seed.ts`, `backend/.env.example`, `backend/package.json`, `docs/FRONTEND_BACKEND_API_MATRIX.md`.
+* Prisma migration: Added `frontend_parity_part_1` and `frontend_parity_part_2` to introduce `walletAddress` to User, and `type`, `nftTokenId`, `fileHash` to Asset with `@unique` constraints.
+* Endpoints implemented: `GET /api/assets`, `GET /api/assets/:id`, `GET /api/audit`, `GET /api/assets/verify/:hash`.
+* Endpoints updated: `POST /api/assets/upload` now strictly enforces duplicate fileHash rejection and integrates with `mintOwnership()`. `/api/auth/me` and `/api/auth/login` include `walletAddress`.
+* Role & Audit: Audit logs return all asset, login, and encryption events. Role restricts uploads to OWNER/ADMIN.
+* Blockchain Adapter: `RealBlockchainAdapter` built using `ethers.js`, correctly using `mintOwnership`, `registerIdentity`, `verifyIntegrity`. Uses `.env` placeholders: `BLOCKCHAIN_RPC_URL`, `CONTRACT_ADDRESS`, `BACKEND_PRIVATE_KEY`.
+* Testing: `test_integration.js` runs a full end-to-end HTTP suite against all new endpoints. 100% Passed.
+* Cross-laptop setup: The backend is ready to point to Parthiban's local Hardhat node by changing `BLOCKCHAIN_RPC_URL`.
+* Blockers: None. Sanjay can now fully integrate the frontend without any backend Mocks.

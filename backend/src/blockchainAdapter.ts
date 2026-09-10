@@ -1,8 +1,12 @@
+import { RealBlockchainAdapter } from './blockchain/RealBlockchainAdapter';
+
 export interface IBlockchainAdapter {
   getHealth(): Promise<string>;
-  mintOwnership(assetId: string, ownerId: string): Promise<{ txHash: string; status: string }>;
+  isVerified(walletAddress: string): Promise<boolean>;
+  registerIdentity(walletAddress: string): Promise<{ txHash: string; status: string }>;
+  mintOwnership(assetId: string, ownerWallet: string, assetHashHex: string): Promise<{ txHash: string; status: string; tokenId: string }>;
   getOwner(assetId: string): Promise<string | null>;
-  grantPermission(assetId: string, granteeId: string): Promise<{ txHash: string; status: string }>;
+  grantPermission(assetId: string, granteeWallet: string): Promise<{ txHash: string; status: string }>;
   verifyIntegrity(assetId: string, fileHash: string): Promise<boolean>;
 }
 
@@ -11,11 +15,24 @@ export class MockBlockchainAdapter implements IBlockchainAdapter {
     return 'MOCK';
   }
 
-  async mintOwnership(assetId: string, ownerId: string): Promise<{ txHash: string; status: string }> {
-    console.log(`[Mock Blockchain] Minting ownership for asset ${assetId} to ${ownerId}`);
+  async isVerified(walletAddress: string): Promise<boolean> {
+    return true; // Assume true for mock
+  }
+
+  async registerIdentity(walletAddress: string): Promise<{ txHash: string; status: string }> {
+    console.log(`[Mock Blockchain] Registering identity for ${walletAddress}`);
+    return {
+      txHash: `mock_tx_ident_${Date.now()}`,
+      status: 'DEMO'
+    };
+  }
+
+  async mintOwnership(assetId: string, ownerWallet: string, assetHashHex: string): Promise<{ txHash: string; status: string; tokenId: string }> {
+    console.log(`[Mock Blockchain] Minting ownership for asset ${assetId} to ${ownerWallet} with hash ${assetHashHex}`);
     return {
       txHash: `mock_tx_${Date.now()}_${Math.random().toString(36).substring(7)}`,
-      status: 'DEMO'
+      status: 'DEMO',
+      tokenId: `mock_token_${Date.now()}`
     };
   }
 
@@ -24,8 +41,8 @@ export class MockBlockchainAdapter implements IBlockchainAdapter {
     return null; // Mock does not store state
   }
 
-  async grantPermission(assetId: string, granteeId: string): Promise<{ txHash: string; status: string }> {
-    console.log(`[Mock Blockchain] Granting permission for asset ${assetId} to ${granteeId}`);
+  async grantPermission(assetId: string, granteeWallet: string): Promise<{ txHash: string; status: string }> {
+    console.log(`[Mock Blockchain] Granting permission for asset ${assetId} to ${granteeWallet}`);
     return {
       txHash: `mock_tx_grant_${Date.now()}`,
       status: 'DEMO'
@@ -38,4 +55,12 @@ export class MockBlockchainAdapter implements IBlockchainAdapter {
   }
 }
 
-export const blockchainAdapter = new MockBlockchainAdapter();
+// Export the appropriate adapter based on environment variables
+export const blockchainAdapter: IBlockchainAdapter = 
+  process.env.BLOCKCHAIN_RPC_URL && process.env.CONTRACT_ADDRESS && process.env.BACKEND_PRIVATE_KEY
+    ? new RealBlockchainAdapter(
+        process.env.BLOCKCHAIN_RPC_URL,
+        process.env.CONTRACT_ADDRESS,
+        process.env.BACKEND_PRIVATE_KEY
+      )
+    : new MockBlockchainAdapter();
