@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  OWNER
+  OFFICIAL
+  VERIFIER
+}
+
+enum ChainStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+}
+
+model User {
+  id           String            @id @default(uuid())
+  username     String            @unique
+  passwordHash String
+  role         Role              @default(OWNER)
+  challenges   WalletChallenge[]
+  assets       Asset[]
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+}
+
+model WalletChallenge {
+  id        String   @id @default(uuid())
+  nonce     String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Asset {
+  id        String   @id @default(uuid())
+  name      String
+  ownerId   String
+  owner     User     @relation(fields: [ownerId], references: [id])
+  status    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ChainOperation {
+  id        String      @id @default(uuid())
+  txHash    String      @unique
+  status    ChainStatus @default(PENDING)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
+
+model AuditEvent {
+  id        String   @id @default(uuid())
+  action    String
+  timestamp DateTime @default(now())
+  details   String?  // Storing JSON as string for simplicity, or Json type if needed.
+}
