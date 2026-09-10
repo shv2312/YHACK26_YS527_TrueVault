@@ -8,7 +8,7 @@ export default function Landing() {
 
       {/* ===== FLOATING NAVBAR ===== */}
       <div className="fixed top-0 left-0 right-0 z-50 flex justify-center px-4 pt-3.5">
-        <nav className="w-full max-w-[1180px] bg-[#11151D]/90 backdrop-blur-xl border border-white/10 rounded-[20px] px-6 py-3 flex items-center justify-between">
+        <nav className="w-full max-w-[1180px] bg-[rgba(10,14,22,0.58)] backdrop-blur-[18px] backdrop-saturate-[140%] border border-[rgba(255,255,255,0.10)] shadow-[0_8px_30px_rgba(0,0,0,0.18)] rounded-[20px] px-6 py-3 flex items-center justify-between">
           <Link to="/" className="flex items-center space-x-2.5">
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
               <Shield className="w-5 h-5 text-white" />
@@ -124,16 +124,16 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ===== DARK TRUST SECTION ===== */}
-      <section className="bg-bg-dark py-28 px-6 relative overflow-hidden">
+      {/* ===== LIGHT TRUST SECTION ===== */}
+      <section className="bg-white py-32 px-6 relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-primary/5 rounded-full blur-[120px]"></div>
         </div>
         <div className="max-w-[800px] mx-auto text-center relative z-10">
-          <h2 className="text-[42px] font-bold text-white tracking-tight leading-tight mb-6">
+          <h2 className="text-[38px] md:text-[44px] font-bold text-text-primary tracking-tight leading-tight mb-6">
             Ownership that can be proven.<br />Access that can be controlled.
           </h2>
-          <p className="text-gray-400 text-[17px] max-w-xl mx-auto leading-relaxed mb-10">
+          <p className="text-text-secondary text-[17px] max-w-xl mx-auto leading-relaxed mb-10">
             TrueVault combines encryption, institutional identity, cryptographic verification and tamper-evident records into one secure ownership workflow.
           </p>
           <Link to="/login">
