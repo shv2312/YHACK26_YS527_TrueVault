@@ -9,43 +9,45 @@ TrueVault is a secure platform for identity verification, asset ownership manage
 - **Backend:** Node.js, Express, TypeScript
 - **Database:** PostgreSQL, Prisma ORM
 - **Authentication:** JWT, bcrypt
-- **Blockchain Integration:** Pending (to be implemented)
-- **Frontend:** Pending
+- **Blockchain Integration:** MockBlockchainAdapter (Pending Smart Contracts)
+- **Frontend:** React + Vite
 
 ## Folder Structure
-- `/backend`: Node.js Express server, Prisma schema, API routes.
-- `/frontend`: Web application frontend (React/Next.js to be added).
+- `/backend`: Node.js Express server, Prisma schema, API routes, File upload logic.
+- `/frontend`: Web application frontend (React).
 - `/blockchain`: Smart contracts and related scripts.
 - `/docs`: Project documentation and work logs.
 
 ## Setup Commands
-### Backend
-1. `cd backend`
-2. `npm install`
-3. Generate Prisma Client: `npx prisma generate`
+### Required Software
+- Node.js (v24)
+- PostgreSQL (Local or via Docker)
 
-## Environment Variables
-Create a `.env` file in the `/backend` directory:
+### Environment Variables
+Create a `.env` file in the `/backend` directory without secret values:
 ```env
-DATABASE_URL="postgresql://user:password@localhost:5432/dbname?schema=public"
+DATABASE_URL="postgresql://truevault:truevault@127.0.0.1:5432/truevault?schema=public"
 JWT_SECRET="your_secret_here"
 PORT=3000
 ```
 
-## Database Migration Commands
-1. Run migrations: `npx prisma migrate dev --name init`
-2. Alternatively, push schema (for quick prototyping): `npx prisma db push`
+### Backend Startup
+1. `cd backend`
+2. `npm install`
+3. Database Migration: `npx prisma db push`
+4. Generate Prisma Client: `npx prisma generate`
+5. Start server: `npm run dev`
 
-## Backend Start Command
-- For development: `npm run dev`
-- For production: `npm run build` then `npm start`
+### Test Commands
+- **Health Check:** `curl http://localhost:3000/api/health`
+- **TypeScript compilation check:** `npx tsc`
+- **Prisma validation:** `npx prisma validate`
 
 ## Current Implementation Status
-- **Shri Hari:** Completed initial Backend Foundation. Set up Express, TypeScript, Prisma, basic models, Auth APIs, health check, and documentation structure.
-- **Pending Work:**
-  - **Sanjay:** Implement Frontend connection to backend APIs.
-  - **Parthiban:** Implement Blockchain integration and Smart Contracts.
-  - **Sindhuja:** Develop specific Asset operations and API routes.
-  - **Sandhiya:** Implement End-to-End Testing and UI improvements.
+- **Current Frontend Origin:** Designed for local development.
+- **Blockchain Adapter Mode:** Currently running `MockBlockchainAdapter` which simulates transaction hashes and states (`PENDING`, `CONFIRMED`).
+- **Authentication:** Fully secured with bcrypt and generic error responses.
+- **File Upload:** Generates SHA-256 hash, runs XOR mock encryption, and stores off-chain locally.
+- **Known Blockers:** Local PostgreSQL DB could not be reached via 5432 in the test environment, preventing endpoint testing.
 
 *Note: Fictitious demo data should be used for testing.*
