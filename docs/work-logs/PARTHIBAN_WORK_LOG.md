@@ -5,6 +5,16 @@
 * Deployed contract: `0x5FbDB2315678afecb367f032d93F642f64180aa3`
 * Execution details: Started node on Private network, deployed successfully, verified bytecode, fully tested via JS script, generated integration documentation, assigned specific service account roles.
 
+## 11 September 2026 - Backend Wallet Authorized
+
+- Backend Public Address: `0x704ed04d239a9e73FeD5b4EBe16ECecc694476b0`
+- Development ETH Balance: 10.0 ETH
+- Role Grants: `VERIFIER_ROLE` (Tx: 0xbe9934c7f99d3f471c4ca728c70fa27c35d856026efa9cecbad5a8c72beb47be), `OFFICIAL_ROLE` (Tx: 0x7d94f6d81a737ee76654ab73d12b02940277e04e46e066355e1552814588e2ba)
+- Role Verification: `VERIFIER_ROLE` and `OFFICIAL_ROLE` confirmed. `DEFAULT_ADMIN_ROLE` confirmed as false.
+- Chain ID: 31337
+- Contract Address: `0x5FbDB2315678afecb367f032d93F642f64180aa3`
+- Node Status: Active and accessible.
+
 ## 10 September 2026 - Verified Blockchain Integration Branch
 
 * Files created/changed: `blockchain/*`, `docs/work-logs/PARTHIBAN_WORK_LOG.md`, `docs/CONTRACT_INTERFACE.md`
