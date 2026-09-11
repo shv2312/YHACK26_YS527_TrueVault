@@ -56,7 +56,7 @@ export default function Dashboard() {
           </div>
           <div className="bg-[#F7F8FA] p-3 rounded-xl border border-border-light">
             <span className="text-text-muted uppercase tracking-wider block mb-0.5 text-[10px] font-bold">Blockchain</span>
-            <span className="text-primary font-semibold">Demo</span>
+            <span className="text-emerald-600 font-semibold">Live Network</span>
           </div>
         </div>
       </div>

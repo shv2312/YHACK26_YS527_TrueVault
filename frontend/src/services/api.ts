@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { mockAssets, mockAuditLogs } from '../data/mockData';
 
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
@@ -58,23 +57,39 @@ export const authService = {
 export const assetService = {
   getAssets: async () => {
     try {
-      // Endpoint does not exist in backend yet.
-      // [DEMO MODE] Fallback to mock data for demonstration.
-      console.info('[DEMO MODE] /api/assets unavailable, using mock data.');
-      return mockAssets;
+      const res = await api.get('/assets');
+      return res.data;
     } catch (e) {
-      return mockAssets;
+      throw new Error('Failed to fetch assets');
     }
   },
   
+  getAssetDetails: async (id: string) => {
+    const res = await api.get(`/assets/${id}`);
+    return res.data;
+  },
+
+  uploadAsset: async (formData: FormData) => {
+    const res = await api.post('/assets/upload', formData); // Axios automatically sets correct headers for FormData without manual boundary
+    return res.data;
+  },
+
+  verifyAsset: async (hash: string) => {
+    const res = await api.get(`/assets/verify/${hash}`);
+    return res.data;
+  },
+
+  downloadAsset: async (id: string) => {
+    const res = await api.get(`/assets/${id}/download`, { responseType: 'blob' });
+    return res.data;
+  },
+
   getAuditLogs: async () => {
     try {
-      // Endpoint does not exist in backend yet.
-      // [DEMO MODE] Fallback to mock data for demonstration.
-      console.info('[DEMO MODE] /api/audit unavailable, using mock data.');
-      return mockAuditLogs;
+      const res = await api.get('/audit');
+      return res.data;
     } catch (e) {
-      return mockAuditLogs;
+      throw new Error('Failed to fetch audit logs');
     }
   }
 };

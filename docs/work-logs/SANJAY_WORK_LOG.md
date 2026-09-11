@@ -27,3 +27,14 @@
 * Demo-only behaviors retained: Asset listing, asset uploading, public verification, and audit logs are retained as explicit Demo Mode fallbacks (`console.info('[DEMO MODE]')`) because the required backend endpoints do not exist yet. Biometric verification also remains simulated.
 * Build/lint/type-check results: `npm run build` passed successfully. `npm run lint` passed (only standard React warnings remaining).
 * Integration failures / Blockers: Asset endpoints (`/api/assets`), Asset Upload, Role/Access Info, and Audit endpoints (`/api/audit`) are completely missing in the current backend (`routes.ts`), therefore they are retained in Demo Mode to prevent breaking the UI.
+
+## 11 September 2026 - Live Backend Integration
+
+* Branch used: `frontend-professional-redesign`
+* Files changed: `frontend/src/services/api.ts`, `frontend/src/pages/UploadAsset.tsx`, `frontend/src/pages/AssetDetails.tsx`, `frontend/src/pages/AuditTrail.tsx`, `frontend/src/pages/Dashboard.tsx`, `frontend/src/pages/RoleAccess.tsx`, `frontend/src/pages/PublicVerify.tsx`.
+* Backend endpoints connected: `/api/assets`, `/api/assets/upload`, `/api/assets/:id`, `/api/assets/:id/download`, `/api/assets/verify/:hash`, `/api/audit`.
+* Mock behaviors removed: Fake upload progress (now calls backend), mock data for assets, fake audit logs removed, offline demo verification.
+* Prototype behaviors retained: Biometric simulation, since no real service exists. Role granting/revoking UI is present but safely disabled pending blockchain smart-contract role-control updates.
+* Build results: `npm run build` passed successfully. `npm run lint` passed. `npm run typecheck` (not applicable, used tsc via build). 
+* Integration failures / Blockers: Role endpoints are not present in backend, thus grant/revoke controls were safely disabled.
+

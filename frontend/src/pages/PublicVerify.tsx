@@ -7,7 +7,6 @@ import { assetService } from '../services/api';
 
 export default function PublicVerify() {
   const [query, setQuery] = useState('');
-  const [hashQuery, setHashQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState('');
@@ -16,10 +15,17 @@ export default function PublicVerify() {
     e.preventDefault(); if (!query) return;
     setLoading(true); setError(''); setResult(null);
     try {
-      const assets = await assetService.getAssets();
-      const found = assets.find((a: any) => a.id === query || a.nftTokenId === query);
-      setTimeout(() => { if (found) { setResult(found); } else { setError('No asset found matching this ID or Token.'); } setLoading(false); }, 1500);
-    } catch { setError('Verification service unavailable.'); setLoading(false); }
+      const verifyRes = await assetService.verifyAsset(query);
+      setResult({
+        verified: verifyRes.verified,
+        blockchainStatus: verifyRes.status,
+        fileHash: query
+      });
+      setLoading(false);
+    } catch { 
+      setError('No asset found matching this hash or verification service unavailable.'); 
+      setLoading(false); 
+    }
   };
 
   return (
@@ -42,14 +48,10 @@ export default function PublicVerify() {
             <p className="text-text-secondary text-[15px] mb-8">Check blockchain-backed ownership and integrity without accessing confidential contents.</p>
             <form onSubmit={handleVerify} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-text-primary mb-1.5">Asset ID or Token ID</label>
-                <input type="text" value={query} onChange={e => setQuery(e.target.value)} placeholder="Enter ID..." className="input-light text-lg" required />
+                <label className="block text-sm font-medium text-text-primary mb-1.5">Asset SHA-256 Hash</label>
+                <input type="text" value={query} onChange={e => setQuery(e.target.value)} placeholder="Enter Hash..." className="input-light text-lg" required />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-text-primary mb-1.5">Expected SHA-256 Hash <span className="text-text-muted font-normal">(Optional)</span></label>
-                <input type="text" value={hashQuery} onChange={e => setHashQuery(e.target.value)} placeholder="e.g., 8d969eef6ecad3c29..." className="input-light font-mono text-sm" />
-              </div>
-              <Button type="submit" isLoading={loading} className="w-full" size="lg"><Search className="w-4 h-4 mr-2" /> Verify Now</Button>
+              <Button type="submit" isLoading={loading} className="w-full" size="lg"><Search className="w-4 h-4 mr-2" /> Verify Hash</Button>
             </form>
           </div>
 
@@ -65,24 +67,16 @@ export default function PublicVerify() {
               <div className="flex items-center justify-between border-b border-border-light pb-5 mb-5">
                 <div className="flex items-center">
                   <CheckCircle className="w-7 h-7 text-emerald-500 mr-3" />
-                  <div><h3 className="text-lg font-bold text-text-primary">Asset Verified</h3><p className="text-sm text-text-secondary mt-0.5">Record found on TrueVault ledger</p></div>
+                  <div><h3 className="text-lg font-bold text-text-primary">Asset Found</h3><p className="text-sm text-text-secondary mt-0.5">Record exists on TrueVault ledger</p></div>
                 </div>
-                <StatusBadge status="info" text="UI Demonstration" />
+                <StatusBadge status="success" text="Live Network" />
               </div>
               <div className="space-y-5">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div><p className="text-xs font-bold text-text-muted uppercase tracking-wider mb-1">Blockchain Status</p><StatusBadge status={result.blockchainStatus === 'CONFIRMED' ? 'success' : 'warning'} text={result.blockchainStatus} /></div>
-                  <div><p className="text-xs font-bold text-text-muted uppercase tracking-wider mb-1">Owner Wallet</p><p className="text-sm font-mono text-text-secondary break-all">{result.ownerWallet}</p></div>
+                  <div><p className="text-xs font-bold text-text-muted uppercase tracking-wider mb-1">Integrity Verified</p><p className="text-sm font-mono text-text-secondary">{result.verified ? 'PASSED' : 'FAILED'}</p></div>
                 </div>
                 <div><p className="text-xs font-bold text-text-muted uppercase tracking-wider mb-1">Registered SHA-256 Hash</p><p className="text-sm font-mono text-primary bg-[#F4F6F8] p-3 rounded-xl border border-border-light break-all">{result.fileHash}</p></div>
-                {hashQuery && (
-                  <div className={`p-4 rounded-xl border ${hashQuery === result.fileHash ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200'}`}>
-                    <h4 className={`text-sm font-bold mb-1 ${hashQuery === result.fileHash ? 'text-emerald-700' : 'text-red-700'}`}>
-                      Integrity Match: {hashQuery === result.fileHash ? 'PASSED' : 'FAILED'}
-                    </h4>
-                    <p className="text-xs text-text-secondary">{hashQuery === result.fileHash ? 'Hash matches the blockchain record.' : 'Hash does NOT match the blockchain record.'}</p>
-                  </div>
-                )}
               </div>
             </div>
           )}

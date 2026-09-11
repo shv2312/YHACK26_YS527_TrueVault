@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { assetService } from '../services/api';
 import { UploadCloud, File, CheckCircle, Database, Lock, ShieldCheck, Cpu, X, AlertTriangle } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 
@@ -12,8 +13,6 @@ export default function UploadAsset() {
   const [hash, setHash] = useState('');
   const [error, setError] = useState('');
 
-  const generateFakeHash = () => { const c = '0123456789abcdef'; let r = ''; for (let i = 0; i < 64; i++) r += c[Math.floor(Math.random() * c.length)]; return r; };
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setError('');
     if (e.target.files && e.target.files[0]) {
@@ -25,15 +24,34 @@ export default function UploadAsset() {
 
   const removeFile = () => { if (uploadState > 0) return; setFile(null); setName(''); setError(''); };
 
-  const handleUpload = (e: React.FormEvent) => {
+  const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) { setError('Please select a file.'); return; }
     if (!name) { setError('Asset name is required.'); return; }
-    setUploadState(1); setHash(generateFakeHash());
-    setTimeout(() => setUploadState(2), 1500);
-    setTimeout(() => setUploadState(3), 3000);
-    setTimeout(() => setUploadState(4), 4500);
-    setTimeout(() => { setUploadState(5); setTimeout(() => navigate('/dashboard'), 2500); }, 6000);
+    
+    setUploadState(1); // Uploading & Hashing
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('name', name);
+      formData.append('type', type);
+      
+      setUploadState(3); // Minting (Skipping 2 to keep UI states moving)
+      
+      const response = await assetService.uploadAsset(formData);
+      
+      if (response && response.asset) {
+        setUploadState(4); // Confirmed
+        if (response.asset.nftTokenId) {
+          setHash(response.asset.nftTokenId);
+        }
+        setUploadState(5); // Success
+        setTimeout(() => navigate('/dashboard'), 2500);
+      }
+    } catch (err: any) {
+      setError(err.message || 'Upload failed');
+      setUploadState(0);
+    }
   };
 
   const getStepStatus = (step: number) => {
@@ -148,7 +166,7 @@ export default function UploadAsset() {
             })}
           </div>
           <div className="mt-6 pt-4 border-t border-border-light text-center">
-            <span className="text-[10px] text-amber-600 uppercase font-bold tracking-widest bg-amber-50 border border-amber-200 px-3 py-1 rounded-full">Demo Mode</span>
+            <span className="text-[10px] text-emerald-600 uppercase font-bold tracking-widest bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">Live Network</span>
           </div>
         </div>
       </div>

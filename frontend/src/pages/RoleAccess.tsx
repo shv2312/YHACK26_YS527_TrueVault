@@ -5,22 +5,20 @@ import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
 
 export default function RoleAccess() {
-  const [permissions, setPermissions] = useState([
-    { id: 1, user: '0xabc...def1', role: 'VERIFIER', status: 'Active', date: '2026-09-08', by: 'ADMIN' },
-    { id: 2, user: '0x999...8882', role: 'OFFICIAL', status: 'Active', date: '2026-09-09', by: 'OWNER' },
-  ]);
+  const [permissions] = useState<any[]>([]);
   const [wallet, setWallet] = useState('');
   const [role, setRole] = useState(mockRoles[0]);
-  const [loading, setLoading] = useState(false);
   const [showRevokeConfirm, setShowRevokeConfirm] = useState<number | null>(null);
 
   const handleGrant = (e: React.FormEvent) => {
-    e.preventDefault(); if (!wallet) return;
-    setLoading(true);
-    setTimeout(() => { setPermissions([...permissions, { id: Date.now(), user: wallet, role, status: 'Active', date: new Date().toISOString().split('T')[0], by: 'Current Session' }]); setWallet(''); setLoading(false); }, 1000);
+    e.preventDefault(); 
+    alert("Role assignment is temporarily disabled pending smart contract upgrade.");
   };
 
-  const executeRevoke = (id: number) => { setPermissions(permissions.filter(p => p.id !== id)); setShowRevokeConfirm(null); };
+  const executeRevoke = () => { 
+    alert("Role revocation is temporarily disabled pending smart contract upgrade.");
+    setShowRevokeConfirm(null); 
+  };
 
   const roleDescs: Record<string, string> = { ADMIN: 'Full administrative rights.', OWNER: 'Full control over uploaded assets.', OFFICIAL: 'Read-only access to assets.', VERIFIER: 'Verify hashes only.' };
 
@@ -45,7 +43,7 @@ export default function RoleAccess() {
                 <select value={role} onChange={e => setRole(e.target.value)} className="input-light appearance-none">{mockRoles.map(r => <option key={r} value={r}>{r}</option>)}</select>
                 <div className="mt-2 p-3 bg-[#F7F8FA] rounded-xl border border-border-light"><p className="text-xs text-text-secondary">{roleDescs[role]}</p></div>
               </div>
-              <Button type="submit" isLoading={loading} className="w-full" size="lg"><UserCheck className="w-4 h-4 mr-2" /> Issue Permission</Button>
+              <Button type="submit" disabled={true} className="w-full" size="lg"><UserCheck className="w-4 h-4 mr-2" /> Issue Permission (Disabled)</Button>
             </form>
           </div>
         </div>
@@ -73,11 +71,11 @@ export default function RoleAccess() {
                         {showRevokeConfirm === p.id ? (
                           <div className="inline-flex items-center bg-white p-2 rounded-xl border border-red-200 shadow-lg">
                             <span className="text-xs text-red-600 mr-2 flex items-center"><AlertTriangle className="w-3 h-3 mr-1" /> Confirm?</span>
-                            <button onClick={() => executeRevoke(p.id)} className="px-3 py-1 bg-red-500 text-white rounded-lg text-xs font-bold mr-1.5 hover:bg-red-600">Yes</button>
+                            <button onClick={() => executeRevoke()} className="px-3 py-1 bg-red-500 text-white rounded-lg text-xs font-bold mr-1.5 hover:bg-red-600">Yes</button>
                             <button onClick={() => setShowRevokeConfirm(null)} className="px-3 py-1 bg-gray-100 text-text-primary rounded-lg text-xs hover:bg-gray-200">Cancel</button>
                           </div>
                         ) : (
-                          <button onClick={() => setShowRevokeConfirm(p.id)} className="text-red-500 hover:text-red-600 flex items-center justify-end w-full font-medium text-sm px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors">
+                          <button onClick={() => setShowRevokeConfirm(p.id)} disabled className="opacity-50 cursor-not-allowed text-red-500 flex items-center justify-end w-full font-medium text-sm px-3 py-1.5 rounded-lg transition-colors">
                             <UserX className="w-4 h-4 mr-1.5" /> Revoke
                           </button>
                         )}

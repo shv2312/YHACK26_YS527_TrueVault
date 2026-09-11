@@ -23,6 +23,35 @@ export default function AssetDetails() {
   const isOwner = asset.accessStatus === 'OWNER';
   const hasAccess = asset.accessStatus === 'OWNER' || asset.accessStatus === 'SHARED';
 
+  const handleDownload = async () => {
+    try {
+      const blob = await assetService.downloadAsset(asset.id);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = asset.name || 'document';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error(e);
+      alert('Failed to download asset');
+    }
+  };
+
+  const handleVerify = async () => {
+    try {
+      const result = await assetService.verifyAsset(asset.fileHash);
+      if (result.verified) {
+        alert('Asset verified successfully on blockchain!');
+      } else {
+        alert('Asset verification failed. Data may be tampered.');
+      }
+    } catch (e) {
+      alert('Error during verification');
+    }
+  };
+
   return (
     <div className="max-w-5xl space-y-6">
       <Link to="/dashboard" className="flex items-center text-sm text-text-secondary hover:text-text-primary transition-colors w-fit">
@@ -44,7 +73,7 @@ export default function AssetDetails() {
             </div>
           </div>
           {hasAccess ? (
-            <Button size="md"><Download className="w-4 h-4 mr-2" /> Download</Button>
+            <Button size="md" onClick={handleDownload}><Download className="w-4 h-4 mr-2" /> Download</Button>
           ) : (
             <Button disabled variant="secondary"><Ban className="w-4 h-4 mr-2" /> Access Denied</Button>
           )}
@@ -75,7 +104,7 @@ export default function AssetDetails() {
             <h3 className="text-sm font-bold text-text-muted uppercase tracking-wider border-b border-border-light pb-3">Actions</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Button variant="secondary" className="justify-start"><Eye className="w-4 h-4 mr-2 text-text-muted" /> View Metadata</Button>
-              <Button variant="secondary" className="justify-start"><Search className="w-4 h-4 mr-2 text-primary" /> Verify Integrity</Button>
+              <Button variant="secondary" className="justify-start" onClick={handleVerify}><Search className="w-4 h-4 mr-2 text-primary" /> Verify Integrity</Button>
               {(isOwner || role === 'ADMIN') && (
                 <>
                   <Button variant="secondary" className="justify-start"><Shield className="w-4 h-4 mr-2 text-blue-500" /> Grant Access</Button>

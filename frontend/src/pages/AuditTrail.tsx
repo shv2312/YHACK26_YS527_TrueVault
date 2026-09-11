@@ -10,16 +10,15 @@ export default function AuditTrail() {
   const [filterType, setFilterType] = useState('ALL');
 
   useEffect(() => {
-    const extendedMockLogs = [
-      { id: 'ext1', action: 'Identity verified', timestamp: new Date(Date.now() - 5 * 60000).toISOString(), actor: '0xabc...def1', status: 'SUCCESS' },
-      { id: 'ext2', action: 'Wallet connected', timestamp: new Date(Date.now() - 15 * 60000).toISOString(), actor: '0xabc...def1', status: 'SUCCESS' },
-      { id: 'ext3', action: 'Login failed (Invalid Creds)', timestamp: new Date(Date.now() - 3600000).toISOString(), actor: 'user@institution.gov', status: 'FAILED' },
-      { id: 'ext4', action: 'Unauthorized access denied', timestamp: new Date(Date.now() - 86400000).toISOString(), actor: '0x999...8882', status: 'DENIED', assetId: 'doc-123' },
-    ];
     assetService.getAuditLogs().then(data => {
-      const mapped = data.map((l: any) => ({ ...l, actor: '0xabc...def1', status: l.action.toLowerCase().includes('denied') || l.action.toLowerCase().includes('failed') ? 'FAILED' : 'SUCCESS' }));
-      const allLogs = [...mapped, ...extendedMockLogs].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-      setLogs(allLogs); setLoading(false);
+      const mapped = data.map((l: any) => ({ 
+        ...l, 
+        actor: '0xabc...def1', // Backend doesn't return actor wallet currently, using standard placeholder
+        status: l.action.toLowerCase().includes('denied') || l.action.toLowerCase().includes('failed') ? 'FAILED' : 'SUCCESS' 
+      }));
+      setLogs(mapped); setLoading(false);
+    }).catch(() => {
+      setLoading(false);
     });
   }, []);
 
@@ -97,7 +96,7 @@ export default function AuditTrail() {
                     <td className="px-6 py-4 whitespace-nowrap"><span className="text-sm font-mono text-text-secondary bg-[#F4F6F8] px-2 py-1 rounded border border-border-light">{log.actor}</span></td>
                     <td className="px-6 py-4 whitespace-nowrap"><div className="flex items-center text-sm text-text-secondary"><Clock className="w-3.5 h-3.5 mr-1.5 text-text-muted" />{new Date(log.timestamp).toLocaleString()}</div></td>
                     <td className="px-6 py-4 whitespace-nowrap"><StatusBadge status={log.status === 'SUCCESS' ? 'success' : (log.status === 'PENDING' ? 'warning' : 'danger')} text={log.status} /></td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right"><span className="text-xs font-mono bg-blue-50 border border-blue-200 text-blue-600 px-2 py-1 rounded-md">DEMO-NET</span></td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right"><span className="text-xs font-mono bg-emerald-50 border border-emerald-200 text-emerald-600 px-2 py-1 rounded-md">LIVE-NET</span></td>
                   </tr>
                 ))}
               </tbody>
