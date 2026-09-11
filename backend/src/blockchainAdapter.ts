@@ -56,11 +56,21 @@ export class MockBlockchainAdapter implements IBlockchainAdapter {
 }
 
 // Export the appropriate adapter based on environment variables
-export const blockchainAdapter: IBlockchainAdapter = 
-  process.env.BLOCKCHAIN_RPC_URL && process.env.CONTRACT_ADDRESS && process.env.BACKEND_PRIVATE_KEY
-    ? new RealBlockchainAdapter(
-        process.env.BLOCKCHAIN_RPC_URL,
-        process.env.CONTRACT_ADDRESS,
-        process.env.BACKEND_PRIVATE_KEY
-      )
-    : new MockBlockchainAdapter();
+let adapter: IBlockchainAdapter;
+
+if (process.env.BLOCKCHAIN_MODE === 'mock') {
+  adapter = new MockBlockchainAdapter();
+} else if (process.env.BLOCKCHAIN_MODE === 'real') {
+  if (!process.env.BLOCKCHAIN_RPC_URL || !process.env.CONTRACT_ADDRESS || !process.env.BACKEND_PRIVATE_KEY) {
+    throw new Error('BLOCKCHAIN_MODE is "real" but required blockchain environment variables are missing.');
+  }
+  adapter = new RealBlockchainAdapter(
+    process.env.BLOCKCHAIN_RPC_URL,
+    process.env.CONTRACT_ADDRESS,
+    process.env.BACKEND_PRIVATE_KEY
+  );
+} else {
+  throw new Error('BLOCKCHAIN_MODE must be explicitly set to "real" or "mock". Silent fallback is disabled.');
+}
+
+export const blockchainAdapter: IBlockchainAdapter = adapter;
