@@ -20,3 +20,9 @@
 - Pending: Role Access UI is disabled because role administration endpoints do not exist in the backend yet.
 - Blockers: None for current functionality. All requested features successfully connected to backend.
 
+
+## 11 September 2026 - Biometric Bug Fix
+
+- Fixed authentication flow at Step 5 to correctly clear stale errors and prevent duplicate API login requests.
+- Proper backend 401 and network errors are now surfaced correctly without being masked by the biometric prototype.
+

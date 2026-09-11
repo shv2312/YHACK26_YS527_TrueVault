@@ -17,7 +17,7 @@ const roleDescriptions: Record<string, string> = {
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
 
   const [step, setStep] = useState(1);
   const [selectedInst, setSelectedInst] = useState<Institution | null>(null);
@@ -30,17 +30,22 @@ export default function Login() {
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleBack = () => { setError(''); setPassword(''); setStep(s => Math.max(1, s - 1)); };
-  const handleChangeInstitution = () => { setPassword(''); setCredId(''); setSelectedRole(null); setSelectedInst(null); setStep(1); };
-  const handleInstSelect = (inst: Institution) => { setSelectedInst(inst); setSelectedRole(null); setStep(2); };
-  const handleRoleSelect = (role: Role) => { setSelectedRole(role); setStep(3); };
+  const handleBack = () => { 
+    setError(''); 
+    if (step === 3) setPassword(''); 
+    setStep(s => Math.max(1, s - 1)); 
+  };
+  const handleChangeInstitution = () => { setError(''); setPassword(''); setCredId(''); setSelectedRole(null); setSelectedInst(null); setStep(1); };
+  const handleInstSelect = (inst: Institution) => { setError(''); setSelectedInst(inst); setSelectedRole(null); setStep(2); };
+  const handleRoleSelect = (role: Role) => { setError(''); setSelectedRole(role); setStep(3); };
 
   const handleCredsSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     if (!credId || !password) { setError('Both fields are required'); return; }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (credId.includes('@') && !emailRegex.test(credId)) { setError('Invalid email format'); return; }
-    setError(''); setStep(4);
+    setStep(4);
   };
 
   const handleWalletConnect = () => { setLoading(true); setTimeout(() => { setWallet('0x71C...976F'); setLoading(false); }, 1000); };
@@ -49,16 +54,30 @@ export default function Login() {
   const handleBiometric = (simulateFailure = false) => {
     setLoading(true); setError('');
     setTimeout(async () => {
-      if (simulateFailure) { setError('Biometric match failed. Please try again.'); setLoading(false); return; }
+      if (simulateFailure) { setError('Demo biometric verification failed'); setLoading(false); return; }
       try {
-        await authService.login(credId, password);
+        if (!isAuthenticated) {
+          await authService.login(credId, password);
+        }
         login(selectedInst?.name || 'Unknown', selectedRole || 'VERIFIER', wallet || '0xDemo');
+        setPassword('');
         navigate('/dashboard');
       } catch (err: any) {
-        setError(err.message || 'Authentication failed. Check credentials.');
+        if (err.response?.status === 401) {
+          setError('Username or password is incorrect');
+        } else if (!err.response && err.request) {
+          setError('Authentication service is unavailable');
+        } else {
+          setError('Authentication failed. Check credentials.');
+        }
         setLoading(false);
       }
     }, 2000);
+  };
+
+  const changeBiometricType = (type: 'fingerprint' | 'iris') => {
+    setError('');
+    setBiometricType(type);
   };
 
   const steps = ['Institution', 'Role', 'Credentials', 'Wallet', 'Verification'];
@@ -178,13 +197,13 @@ export default function Login() {
                 <form onSubmit={handleCredsSubmit} className="space-y-5">
                   <div>
                     <label className="block text-sm font-medium text-text-primary mb-1.5">Institution ID or Official Email</label>
-                    <input type="text" value={credId} onChange={e => setCredId(e.target.value)}
+                    <input type="text" value={credId} onChange={e => { setCredId(e.target.value); setError(''); }}
                       className="input-light" placeholder="e.g. user@institution.gov" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-text-primary mb-1.5">Password</label>
                     <div className="relative">
-                      <input type={showPassword ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)}
+                      <input type={showPassword ? 'text' : 'password'} value={password} onChange={e => { setPassword(e.target.value); setError(''); }}
                         className="input-light pr-12" placeholder="Enter secure password" />
                       <button type="button" onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary">
@@ -233,11 +252,11 @@ export default function Login() {
                   <p className="text-xs text-amber-800"><strong>Notice:</strong> Biometric verification is simulated for prototype demonstration and does not represent real biometric authentication. No biometric data is accessed, generated, or stored.</p>
                 </div>
                 <div className="flex justify-center space-x-3 mb-7">
-                  <button onClick={() => setBiometricType('fingerprint')}
+                  <button onClick={() => changeBiometricType('fingerprint')}
                     className={`p-4 rounded-[14px] border-2 transition-all ${biometricType === 'fingerprint' ? 'border-primary bg-primary/8' : 'border-border-light bg-white'}`}>
                     <Fingerprint className={`w-7 h-7 ${biometricType === 'fingerprint' ? 'text-primary' : 'text-text-muted'}`} />
                   </button>
-                  <button onClick={() => setBiometricType('iris')}
+                  <button onClick={() => changeBiometricType('iris')}
                     className={`p-4 rounded-[14px] border-2 transition-all ${biometricType === 'iris' ? 'border-primary bg-primary/8' : 'border-border-light bg-white'}`}>
                     <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center ${biometricType === 'iris' ? 'border-primary' : 'border-text-muted'}`}>
                       <div className={`w-2.5 h-2.5 rounded-full ${biometricType === 'iris' ? 'bg-primary' : 'bg-text-muted'}`}></div>
@@ -248,7 +267,7 @@ export default function Login() {
                   <Fingerprint className={`w-20 h-20 mx-auto ${loading && !error ? 'text-primary animate-pulse' : 'text-gray-300'}`} />
                 </div>
                 <div className="space-y-3">
-                  <Button onClick={() => handleBiometric(false)} isLoading={loading} className="w-full" size="lg">Start Demo Verification</Button>
+                  <Button onClick={() => handleBiometric(false)} disabled={loading} isLoading={loading} className="w-full" size="lg">Start Demo Verification</Button>
                   {!loading && <Button onClick={() => handleBiometric(true)} variant="secondary" className="w-full" size="md">Simulate Failure State</Button>}
                 </div>
               </div>

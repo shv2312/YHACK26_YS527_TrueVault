@@ -38,3 +38,12 @@
 * Build results: `npm run build` passed successfully. `npm run lint` passed. `npm run typecheck` (not applicable, used tsc via build). 
 * Integration failures / Blockers: Role endpoints are not present in backend, thus grant/revoke controls were safely disabled.
 
+
+## 11 September 2026 - Biometric Prototype Bug Fix
+
+* Fixed 'Invalid credentials' bug in Final Authorization step (Step 5) where biometric simulation would fail if the user navigated back and lost credentials or if a duplicate login occurred.
+* Cleared stale errors on state changes (back, input edit, biometric type change).
+* Implemented check to prevent duplicate login requests if already authenticated (`isAuthenticated`).
+* Prevented password persistence after successful login or leaving the flow.
+* Build and lint checks passed successfully.
+
