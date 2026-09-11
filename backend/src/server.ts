@@ -8,9 +8,9 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Restrict CORS to documented frontend origin
+// Allow local dev origins (localhost and LAN)
 const corsOptions = {
-  origin: 'http://localhost:5173',
+  origin: true,
   optionsSuccessStatus: 200,
   credentials: true
 };
@@ -27,6 +27,9 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   res.status(500).json({ error: 'Internal server error' });
 });
 
-app.listen(PORT, () => {
-  console.log(`TrueVault Backend running on port ${PORT}`);
+const HOST = '0.0.0.0';
+
+app.listen(Number(PORT), HOST, () => {
+  console.log(`TrueVault Backend running on http://${HOST}:${PORT}`);
 });
+
