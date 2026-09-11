@@ -99,7 +99,14 @@ export default function Login() {
     setBiometricType(type);
   };
 
+  const handleDemoLogin = () => {
+    localStorage.setItem('truevault_demo_mode', 'true');
+    login('TrueVault Demo', 'ADMIN', '0xDemoWallet', true);
+    navigate('/dashboard');
+  };
+
   const steps = ['Institution', 'Role', 'Credentials', 'Wallet', 'Verification'];
+  const showDemoButton = import.meta.env.DEV && import.meta.env.VITE_ENABLE_DEMO_LOGIN === 'true';
 
   return (
     <div className="min-h-screen bg-[#F7F8FA] flex flex-col">
@@ -292,6 +299,15 @@ export default function Login() {
               </div>
             )}
           </div>
+
+          {/* Demo Mode Button (Development Only) */}
+          {showDemoButton && (
+            <div className="mt-6 text-center">
+              <button onClick={handleDemoLogin} className="text-xs font-semibold text-gray-500 hover:text-primary transition-colors bg-white px-4 py-2 rounded-full border border-gray-200 shadow-sm">
+                Developer: Enter Demo Mode
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

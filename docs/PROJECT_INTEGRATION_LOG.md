@@ -32,3 +32,9 @@
 - Improved frontend security posture by forcing real API login at Step 3.
 - Final Authorization (Step 5) is now completely decoupled from real credential submission and correctly acts purely as a labelled biometric prototype animation.
 
+
+## 11 September 2026 - Added Safe Demo Mode
+
+- Safely implemented a development-only Demo Login mechanism for isolated frontend presentations.
+- Ensured no real APIs are called during demo mode and no real JWT is faked, fully preserving production security architecture.
+

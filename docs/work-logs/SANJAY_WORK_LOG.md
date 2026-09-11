@@ -56,3 +56,13 @@
 * Final Authorization (Step 5) now strictly verifies the existing AuthContext session without submitting an API login request.
 * Maintained the demo/simulation animations independently from real API operations.
 
+
+## 11 September 2026 - Add Safe Frontend Demo Login Mode
+
+* Added development-only Demo Mode to simulate authentication without weakening real backend security.
+* Controlled strictly by `VITE_ENABLE_DEMO_LOGIN=true` and `import.meta.env.DEV` flags to prevent production exposure.
+* Added persistent visible banner to Dashboard layout: 'DEMO MODE – Authentication is simulated'.
+* Used fictional identity (demo@truevault.local, ADMIN role) for demo sessions.
+* Implemented strict Axios interceptor logic to proactively throw 'Real login required for this operation' if any protected backend API is called while in Demo Mode.
+* Verified production builds completely strip Demo Mode availability.
+

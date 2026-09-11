@@ -8,7 +8,7 @@ import { StatusBadge } from '../components/ui/StatusBadge';
 export default function DashboardLayout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { institutionName, role, walletAddress, isAuthenticated, logout } = useAuth();
+  const { institutionName, role, walletAddress, isAuthenticated, isDemoMode, logout } = useAuth();
 
   useEffect(() => {
     if (!isAuthenticated) { navigate('/login'); }
@@ -70,6 +70,15 @@ export default function DashboardLayout() {
 
       {/* ===== LIGHT MAIN WORKSPACE ===== */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden bg-[#F7F8FA]">
+
+        {/* Demo Banner */}
+        {isDemoMode && (
+          <div className="bg-amber-50 border-b border-amber-200 px-8 py-2.5 flex items-center justify-center shrink-0">
+            <span className="text-amber-800 text-sm font-semibold tracking-wide">
+              DEMO MODE – Authentication is simulated
+            </span>
+          </div>
+        )}
 
         {/* Header */}
         <header className="bg-white border-b border-border-light px-8 py-4 flex justify-between items-center shrink-0">

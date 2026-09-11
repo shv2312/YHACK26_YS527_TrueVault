@@ -7,11 +7,12 @@ interface AuthState {
   role: Role | null;
   walletAddress: string | null;
   isAuthenticated: boolean;
+  isDemoMode: boolean;
   isLoading: boolean;
 }
 
 interface AuthContextType extends AuthState {
-  login: (institutionName: string, role: Role, walletAddress: string) => void;
+  login: (institutionName: string, role: Role, walletAddress: string, isDemoMode?: boolean) => void;
   logout: () => void;
 }
 
@@ -23,12 +24,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     role: null,
     walletAddress: null,
     isAuthenticated: false,
+    isDemoMode: false,
     isLoading: true,
   });
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        const isDemo = localStorage.getItem('truevault_demo_mode') === 'true';
+        if (isDemo) {
+          setAuthState({
+            institutionName: 'TrueVault Demo',
+            role: 'ADMIN',
+            walletAddress: '0xDemoWallet',
+            isAuthenticated: true,
+            isDemoMode: true,
+            isLoading: false,
+          });
+          return;
+        }
+        
         const token = localStorage.getItem('truevault_token');
         if (token) {
           const data = await authService.getCurrentUser();
@@ -37,6 +52,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             role: (data.user.role as Role) || 'ADMIN',
             walletAddress: data.user.username,
             isAuthenticated: true,
+            isDemoMode: false,
             isLoading: false,
           });
         } else {
@@ -49,23 +65,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     checkAuth();
   }, []);
 
-  const login = (institutionName: string, role: Role, walletAddress: string) => {
+  const login = (institutionName: string, role: Role, walletAddress: string, isDemoMode: boolean = false) => {
     setAuthState({
       institutionName,
       role,
       walletAddress,
       isAuthenticated: true,
+      isDemoMode,
       isLoading: false,
     });
   };
 
   const logout = async () => {
+    localStorage.removeItem('truevault_demo_mode');
     await authService.logout();
     setAuthState({
       institutionName: null,
       role: null,
       walletAddress: null,
       isAuthenticated: false,
+      isDemoMode: false,
       isLoading: false,
     });
   };

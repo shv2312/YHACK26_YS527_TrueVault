@@ -4,8 +4,11 @@ export const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
 });
 
-// Add a request interceptor to include the JWT token
+// Add a request interceptor to include the JWT token and block demo mode
 api.interceptors.request.use((config) => {
+  if (localStorage.getItem('truevault_demo_mode') === 'true' && config.url !== '/auth/login' && config.url !== '/auth/logout') {
+    return Promise.reject(new Error('Real login required for this operation.'));
+  }
   const token = localStorage.getItem('truevault_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -25,6 +28,7 @@ export const authService = {
       }
       return res.data;
     } catch (e: any) {
+      if (e.message === 'Real login required for this operation.') throw e;
       if (e.response && e.response.data) {
         throw new Error(e.response.data.error || 'Login failed');
       }
@@ -59,36 +63,58 @@ export const assetService = {
     try {
       const res = await api.get('/assets');
       return res.data;
-    } catch (e) {
+    } catch (e: any) {
+      if (e.message === 'Real login required for this operation.') throw e;
       throw new Error('Failed to fetch assets');
     }
   },
   
   getAssetDetails: async (id: string) => {
-    const res = await api.get(`/assets/${id}`);
-    return res.data;
+    try {
+      const res = await api.get(`/assets/${id}`);
+      return res.data;
+    } catch (e: any) {
+      if (e.message === 'Real login required for this operation.') throw e;
+      throw e;
+    }
   },
 
   uploadAsset: async (formData: FormData) => {
-    const res = await api.post('/assets/upload', formData); // Axios automatically sets correct headers for FormData without manual boundary
-    return res.data;
+    try {
+      const res = await api.post('/assets/upload', formData); // Axios automatically sets correct headers for FormData without manual boundary
+      return res.data;
+    } catch (e: any) {
+      if (e.message === 'Real login required for this operation.') throw e;
+      throw e;
+    }
   },
 
   verifyAsset: async (hash: string) => {
-    const res = await api.get(`/assets/verify/${hash}`);
-    return res.data;
+    try {
+      const res = await api.get(`/assets/verify/${hash}`);
+      return res.data;
+    } catch (e: any) {
+      if (e.message === 'Real login required for this operation.') throw e;
+      throw e;
+    }
   },
 
   downloadAsset: async (id: string) => {
-    const res = await api.get(`/assets/${id}/download`, { responseType: 'blob' });
-    return res.data;
+    try {
+      const res = await api.get(`/assets/${id}/download`, { responseType: 'blob' });
+      return res.data;
+    } catch (e: any) {
+      if (e.message === 'Real login required for this operation.') throw e;
+      throw e;
+    }
   },
 
   getAuditLogs: async () => {
     try {
       const res = await api.get('/audit');
       return res.data;
-    } catch (e) {
+    } catch (e: any) {
+      if (e.message === 'Real login required for this operation.') throw e;
       throw new Error('Failed to fetch audit logs');
     }
   }
