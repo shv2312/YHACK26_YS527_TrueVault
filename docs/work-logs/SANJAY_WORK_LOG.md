@@ -47,3 +47,12 @@
 * Prevented password persistence after successful login or leaving the flow.
 * Build and lint checks passed successfully.
 
+
+## 11 September 2026 - Separate Real Login From Biometric Prototype
+
+* Moved real backend authentication (POST /api/auth/login) from Step 5 to Step 3 (Credentials).
+* Mapped specific HTTP errors (400, 401, network failures) gracefully to Step 3 UI.
+* Cleared password from React state immediately upon successful Step 3 login to prevent persistence.
+* Final Authorization (Step 5) now strictly verifies the existing AuthContext session without submitting an API login request.
+* Maintained the demo/simulation animations independently from real API operations.
+

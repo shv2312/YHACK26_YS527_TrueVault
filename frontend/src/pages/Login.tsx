@@ -39,37 +39,56 @@ export default function Login() {
   const handleInstSelect = (inst: Institution) => { setError(''); setSelectedInst(inst); setSelectedRole(null); setStep(2); };
   const handleRoleSelect = (role: Role) => { setError(''); setSelectedRole(role); setStep(3); };
 
-  const handleCredsSubmit = (e: React.FormEvent) => {
+  const handleCredsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (!credId || !password) { setError('Both fields are required'); return; }
+    if (!credId || !password) { setError('Please enter all required credentials.'); return; }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (credId.includes('@') && !emailRegex.test(credId)) { setError('Invalid email format'); return; }
-    setStep(4);
+    
+    setLoading(true);
+    try {
+      await authService.login(credId, password);
+      login(selectedInst?.name || 'Unknown', selectedRole || 'VERIFIER', wallet || '0xDemo');
+      setPassword('');
+      setStep(4);
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        setError('Username or password is incorrect.');
+      } else if (err.response?.status === 400) {
+        setError('Please enter all required credentials.');
+      } else if (!err.response && err.request) {
+        setError('Authentication service is unavailable.');
+      } else {
+        setError('Authentication response was invalid.');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleWalletConnect = () => { setLoading(true); setTimeout(() => { setWallet('0x71C...976F'); setLoading(false); }, 1000); };
   const handleWalletNext = () => { if (!wallet) return; setStep(5); };
 
   const handleBiometric = (simulateFailure = false) => {
-    setLoading(true); setError('');
-    setTimeout(async () => {
-      if (simulateFailure) { setError('Demo biometric verification failed'); setLoading(false); return; }
+    setError('');
+    if (!isAuthenticated) {
+      setError('Please sign in before continuing.');
+      setStep(3);
+      return;
+    }
+    
+    setLoading(true);
+    setTimeout(() => {
       try {
-        if (!isAuthenticated) {
-          await authService.login(credId, password);
+        if (simulateFailure) { 
+          setError('Demo biometric verification failed.'); 
+          return; 
         }
+        // Update context with the selected wallet before navigating
         login(selectedInst?.name || 'Unknown', selectedRole || 'VERIFIER', wallet || '0xDemo');
-        setPassword('');
         navigate('/dashboard');
-      } catch (err: any) {
-        if (err.response?.status === 401) {
-          setError('Username or password is incorrect');
-        } else if (!err.response && err.request) {
-          setError('Authentication service is unavailable');
-        } else {
-          setError('Authentication failed. Check credentials.');
-        }
+      } finally {
         setLoading(false);
       }
     }, 2000);
@@ -211,7 +230,7 @@ export default function Login() {
                       </button>
                     </div>
                   </div>
-                  <Button type="submit" className="w-full" size="lg">Verify Credentials</Button>
+                  <Button type="submit" disabled={loading} isLoading={loading} className="w-full" size="lg">Verify Credentials</Button>
                 </form>
               </div>
             )}
