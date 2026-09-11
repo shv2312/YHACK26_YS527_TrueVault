@@ -19,8 +19,8 @@ api.interceptors.request.use((config) => {
 export const authService = {
   login: async (username: string, password?: string) => {
     try {
-      // Use real backend endpoint
-      const res = await api.post('/auth/login', { username, password });
+      // Use real backend endpoint with a timeout bound
+      const res = await api.post('/auth/login', { username, password }, { timeout: 8000 });
       
       // Store JWT token on success
       if (res.data && res.data.token) {
@@ -49,7 +49,7 @@ export const authService = {
 
   getCurrentUser: async () => {
     try {
-      const res = await api.get('/auth/me');
+      const res = await api.get('/auth/me', { timeout: 8000 });
       return res.data;
     } catch (e) {
       localStorage.removeItem('truevault_token');

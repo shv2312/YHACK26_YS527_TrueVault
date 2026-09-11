@@ -38,3 +38,10 @@
 - Safely implemented a development-only Demo Login mechanism for isolated frontend presentations.
 - Ensured no real APIs are called during demo mode and no real JWT is faked, fully preserving production security architecture.
 
+
+## 11 September 2026 - Resolved Infinite Loading Bug
+
+- Fixed an infinite loading bug preventing the /login screen from rendering.
+- Implemented strict Axios timeouts (8000ms) for authentication API calls.
+- Hardened AuthContext state initialization using deterministic finally blocks to ensure the UI always unlocks after authentication checks, regardless of backend availability.
+

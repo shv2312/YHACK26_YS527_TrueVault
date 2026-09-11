@@ -29,40 +29,53 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   });
 
   useEffect(() => {
+    let isMounted = true;
+    
     const checkAuth = async () => {
       try {
         const isDemo = localStorage.getItem('truevault_demo_mode') === 'true';
         if (isDemo) {
-          setAuthState({
-            institutionName: 'TrueVault Demo',
-            role: 'ADMIN',
-            walletAddress: '0xDemoWallet',
-            isAuthenticated: true,
-            isDemoMode: true,
-            isLoading: false,
-          });
+          if (isMounted) {
+            setAuthState({
+              institutionName: 'TrueVault Demo',
+              role: 'ADMIN',
+              walletAddress: '0xDemoWallet',
+              isAuthenticated: true,
+              isDemoMode: true,
+              isLoading: false,
+            });
+          }
           return;
         }
         
         const token = localStorage.getItem('truevault_token');
         if (token) {
           const data = await authService.getCurrentUser();
-          setAuthState({
-            institutionName: 'TrueVault Integrated',
-            role: (data.user.role as Role) || 'ADMIN',
-            walletAddress: data.user.username,
-            isAuthenticated: true,
-            isDemoMode: false,
-            isLoading: false,
-          });
-        } else {
-          setAuthState(prev => ({ ...prev, isLoading: false }));
+          if (isMounted) {
+            setAuthState({
+              institutionName: 'TrueVault Integrated',
+              role: (data.user.role as Role) || 'ADMIN',
+              walletAddress: data.user.username,
+              isAuthenticated: true,
+              isDemoMode: false,
+              isLoading: false,
+            });
+          }
         }
       } catch (error) {
-        setAuthState(prev => ({ ...prev, isLoading: false }));
+        console.warn('Auth check failed:', error);
+      } finally {
+        if (isMounted) {
+          setAuthState(prev => ({ ...prev, isLoading: false }));
+        }
       }
     };
+    
     checkAuth();
+    
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const login = (institutionName: string, role: Role, walletAddress: string, isDemoMode: boolean = false) => {

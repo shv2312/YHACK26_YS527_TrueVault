@@ -66,3 +66,12 @@
 * Implemented strict Axios interceptor logic to proactively throw 'Real login required for this operation' if any protected backend API is called while in Demo Mode.
 * Verified production builds completely strip Demo Mode availability.
 
+
+## 11 September 2026 - Fix Infinite Authentication Loading Screen
+
+* Investigated and resolved a bug where the /login page would hang indefinitely with a loading spinner.
+* The root cause was twofold: `AuthContext.tsx` initialization lacked a strictly executed `finally` block when token validation skipped or failed, and Axios lacked a network timeout for authentication checks.
+* Added an 8000ms timeout boundary to `authService.getCurrentUser` and `authService.login` in `api.ts` so the frontend gracefully catches network/backend unavailability.
+* Refactored `AuthContext.tsx` to use a deterministic `finally` block with `isMounted` safety checks, guaranteeing that `isLoading` is always set to `false` regardless of network success, failure, timeout, or Demo Mode active state.
+* The public /login route now correctly renders even if the backend is temporarily unreachable.
+
