@@ -75,3 +75,12 @@
 * Refactored `AuthContext.tsx` to use a deterministic `finally` block with `isMounted` safety checks, guaranteeing that `isLoading` is always set to `false` regardless of network success, failure, timeout, or Demo Mode active state.
 * The public /login route now correctly renders even if the backend is temporarily unreachable.
 
+
+## 11 September 2026 - Streamline Demo Mode Authentication Flow
+
+* Integrated Demo Mode directly into the main 'Verify Credentials' flow rather than requiring a separate developer button.
+* When `VITE_ENABLE_DEMO_LOGIN=true` and `import.meta.env.DEV` are active, the form accepts any non-empty username/password, bypasses the strict email validation check, and completely skips the real backend `/api/auth/login` call.
+* Instead, it instantly provisions a secure local demo session via `AuthContext` and redirects the user immediately to `/dashboard`, explicitly skipping the Wallet and Biometric steps.
+* Ensured entered passwords are aggressively cleared from React state immediately and never saved or transmitted.
+* The application continues to safely block demo users from accessing protected backend data by rendering honest empty/error states (e.g. "Real login required for this operation") without hanging or spoofing real data.
+

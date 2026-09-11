@@ -43,11 +43,24 @@ export default function Login() {
     e.preventDefault();
     setError('');
     if (!credId || !password) { setError('Please enter all required credentials.'); return; }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (credId.includes('@') && !emailRegex.test(credId)) { setError('Invalid email format'); return; }
+    
+    const isDemoModeEnabled = import.meta.env.DEV && import.meta.env.VITE_ENABLE_DEMO_LOGIN === 'true';
+    
+    if (!isDemoModeEnabled) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (credId.includes('@') && !emailRegex.test(credId)) { setError('Invalid email format'); return; }
+    }
     
     setLoading(true);
     try {
+      if (isDemoModeEnabled) {
+        localStorage.setItem('truevault_demo_mode', 'true');
+        login(selectedInst?.name || 'Unknown', selectedRole || 'VERIFIER', credId, true);
+        setPassword('');
+        navigate('/dashboard');
+        return;
+      }
+      
       await authService.login(credId, password);
       login(selectedInst?.name || 'Unknown', selectedRole || 'VERIFIER', wallet || '0xDemo');
       setPassword('');
@@ -99,14 +112,7 @@ export default function Login() {
     setBiometricType(type);
   };
 
-  const handleDemoLogin = () => {
-    localStorage.setItem('truevault_demo_mode', 'true');
-    login('TrueVault Demo', 'ADMIN', '0xDemoWallet', true);
-    navigate('/dashboard');
-  };
-
   const steps = ['Institution', 'Role', 'Credentials', 'Wallet', 'Verification'];
-  const showDemoButton = import.meta.env.DEV && import.meta.env.VITE_ENABLE_DEMO_LOGIN === 'true';
 
   return (
     <div className="min-h-screen bg-[#F7F8FA] flex flex-col">
@@ -299,15 +305,6 @@ export default function Login() {
               </div>
             )}
           </div>
-
-          {/* Demo Mode Button (Development Only) */}
-          {showDemoButton && (
-            <div className="mt-6 text-center">
-              <button onClick={handleDemoLogin} className="text-xs font-semibold text-gray-500 hover:text-primary transition-colors bg-white px-4 py-2 rounded-full border border-gray-200 shadow-sm">
-                Developer: Enter Demo Mode
-              </button>
-            </div>
-          )}
         </div>
       </div>
     </div>

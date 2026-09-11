@@ -45,3 +45,9 @@
 - Implemented strict Axios timeouts (8000ms) for authentication API calls.
 - Hardened AuthContext state initialization using deterministic finally blocks to ensure the UI always unlocks after authentication checks, regardless of backend availability.
 
+
+## 11 September 2026 - Optimized Demo Mode Login Experience
+
+- Improved the frontend demonstration flow by letting the user authenticate with any non-empty arbitrary credentials directly on the main Login screen, instantly redirecting to the dashboard as a demo user.
+- No backend calls are made in this scenario. Protected data continues to be securely restricted from demo sessions via the previously implemented Axios interceptor.
+
